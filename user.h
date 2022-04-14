@@ -23,7 +23,7 @@ int getpid(void);
 char* sbrk(int);
 int sleep(int);
 int uptime(void);
-int find_prime_number(void);
+int find_prime_number(int);
 
 // ulib.c
 int stat(const char*, struct stat*);
