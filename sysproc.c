@@ -6,6 +6,7 @@
 #include "memlayout.h"
 #include "mmu.h"
 #include "proc.h"
+#include "syscall.h"
 
 int
 sys_fork(void)
@@ -121,4 +122,13 @@ sys_find_prime_number(void)
     }
   }
   return prime;
+}
+
+int
+sys_get_call_count(void) {
+  int syscall_number;
+  if(argint(0, &syscall_number) < 0)
+    return -1;
+  
+  return 1; // fetch number of calls from history
 }
