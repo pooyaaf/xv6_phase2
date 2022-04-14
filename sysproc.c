@@ -133,6 +133,15 @@ sys_get_call_count(void) {
   return get_call_count(syscall_number);
 }
 
+int
+sys_get_most_caller(void) {
+  int syscall_number;
+  if(argint(0, &syscall_number) < 0)
+    return -1;
+  
+  return get_most_caller(syscall_number);
+}
+
 int sys_wait_for_process(void) {
   int pid;
   if(argint(0, &pid) < 0)
