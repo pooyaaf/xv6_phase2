@@ -136,6 +136,12 @@ static int (*syscalls[])(void) = {
 [SYS_wait_for_process] sys_wait_for_process,
 };
 
+int syscall_count[NPROC][SYSCALL_CNT] = {0};
+
+int get_call_count(int syscall_num) {
+  return syscall_count[myproc()->pid][syscall_num];
+}
+
 void
 syscall(void)
 {
@@ -145,7 +151,7 @@ syscall(void)
   num = curproc->tf->eax;
   if(num > 0 && num < NELEM(syscalls) && syscalls[num]) {
     curproc->tf->eax = syscalls[num]();
-    // add this call to history
+    syscall_count[curproc->pid][num]++;
   } else {
     cprintf("%d %s: unknown sys call %d\n",
             curproc->pid, curproc->name, num);

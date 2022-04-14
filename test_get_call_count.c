@@ -12,9 +12,18 @@ int main(int argc,char *argv[])
 {
     if (fork() == 0) {
         print_syscalls("first child");
+        exit();
     }
     else {
-        print_syscalls("parent");
+        if (fork() == 0) {
+            print_syscalls("second child");
+            exit();
+        }
+        else {
+            wait();
+            print_syscalls("parent");
+            exit();
+        }
     }
 
     exit();

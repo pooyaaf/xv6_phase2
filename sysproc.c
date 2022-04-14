@@ -130,7 +130,7 @@ sys_get_call_count(void) {
   if(argint(0, &syscall_number) < 0)
     return -1;
   
-  return 1; // fetch number of calls from history
+  return get_call_count(syscall_number);
 }
 
 int sys_wait_for_process(void) {
