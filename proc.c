@@ -267,6 +267,40 @@ exit(void)
   panic("zombie exit");
 }
 
+int
+wait_for_process(int pid) {
+  struct proc *p;
+  int process_exists = 0;
+
+  acquire(&ptable.lock);
+  for(;;) {
+    process_exists = 0;
+    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+      if (p->pid == pid) {
+        process_exists = 1;
+        if(p->state == ZOMBIE) {
+          kfree(p->kstack);
+          p->kstack = 0;
+          freevm(p->pgdir);
+          p->pid = 0;
+          p->parent = 0;
+          p->name[0] = 0;
+          p->killed = 0;
+          p->state = UNUSED;
+          release(&ptable.lock);
+          return pid;
+        }
+        sleep(p, &ptable.lock);
+        break;
+      }
+    }
+    if (!process_exists) {
+      release(&ptable.lock);
+      return -1;
+    }
+  }
+}
+
 // Wait for a child process to exit and return its pid.
 // Return -1 if this process has no children.
 int
