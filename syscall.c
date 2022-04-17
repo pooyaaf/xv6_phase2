@@ -104,9 +104,9 @@ extern int sys_wait(void);
 extern int sys_write(void);
 extern int sys_uptime(void);
 extern int sys_find_prime_number(void);
-// extern int sys_get_call_count(void);
-// extern int sys_get_most_caller(void);
-// extern int sys_wait_for_process(void);
+extern int sys_get_call_count(void);
+extern int sys_get_most_caller(void);
+extern int sys_wait_for_process(void);
 
 static int (*syscalls[])(void) = {
 [SYS_fork]    sys_fork,
@@ -131,10 +131,28 @@ static int (*syscalls[])(void) = {
 [SYS_mkdir]   sys_mkdir,
 [SYS_close]   sys_close,
 [SYS_find_prime_number] sys_find_prime_number,
-// [SYS_get_call_count] sys_get_call_count,
-// [SYS_get_most_caller] sys_get_most_caller,
-// [SYS_wait_for_process] sys_wait_for_process,
+[SYS_get_call_count] sys_get_call_count,
+[SYS_get_most_caller] sys_get_most_caller,
+[SYS_wait_for_process] sys_wait_for_process,
 };
+
+int syscall_count[NPROC][SYSCALL_CNT] = {0};
+
+int get_call_count(int syscall_num) {
+  return syscall_count[myproc()->pid][syscall_num];
+}
+
+int get_most_caller(int syscall_num) {
+  int max = 0;
+  int pid = 0;
+  for(int i = 0; i < NPROC; i++) {
+    if (syscall_count[i][syscall_num] > max) {
+      max = syscall_count[i][syscall_num];
+      pid = i;
+    }
+  }
+  return pid;
+}
 
 void
 syscall(void)
@@ -145,6 +163,7 @@ syscall(void)
   num = curproc->tf->eax;
   if(num > 0 && num < NELEM(syscalls) && syscalls[num]) {
     curproc->tf->eax = syscalls[num]();
+    syscall_count[curproc->pid][num]++;
   } else {
     cprintf("%d %s: unknown sys call %d\n",
             curproc->pid, curproc->name, num);
