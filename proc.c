@@ -269,8 +269,10 @@ exit(void)
 
 int
 wait_for_process(int pid) {
+  struct proc *curproc = myproc();
   struct proc *p;
   int process_exists = 0;
+  int zpid;
 
   acquire(&ptable.lock);
   for(;;) {
@@ -279,24 +281,24 @@ wait_for_process(int pid) {
       if (p->pid == pid) {
         process_exists = 1;
         if(p->state == ZOMBIE) {
+          zpid = p->pid;
           kfree(p->kstack);
           p->kstack = 0;
           freevm(p->pgdir);
+          p->state = UNUSED;
           p->pid = 0;
           p->parent = 0;
           p->name[0] = 0;
           p->killed = 0;
-          p->state = UNUSED;
           release(&ptable.lock);
-          return pid;
+          return zpid;
         }
-        sleep(p, &ptable.lock);
-        break;
       }
-    }
-    if (!process_exists) {
-      release(&ptable.lock);
-      return -1;
+      if (!process_exists || curproc->killed) {
+        release(&ptable.lock);
+        return -1;
+      }
+      sleep(curproc, &ptable.lock);
     }
   }
 }

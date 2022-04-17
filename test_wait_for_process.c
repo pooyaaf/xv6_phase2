@@ -10,25 +10,23 @@ int main(int argc,char *argv[])
 
     if (cid1 == 0) {
         printf(1, "starting child 1\n");
-        sleep(10);
-        printf(1, "child 1 ended\n");
+        int i = 0;
+        while (i++ < 1000000000);
+        printf(1, "child 1 is done\n");
         exit();
     }
     else {
         cid2 = fork();
         if (cid2 == 0) {
-            printf(1, "child 2 started waiting for child 1\n");
             wait_for_process(cid1);
             printf(1, "child 2 waiting is over\n");
             exit();
         }
         else {
-            printf(1, "parent started waiting for child 1\n");
             wait();
-            printf(1, "parent waiting is over\n");
             exit();
         }
     }
-
     exit();
+    return 0;
 }
